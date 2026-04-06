@@ -66519,6 +66519,10 @@ PrefabInstance:
       propertyPath: gameInput
       value: 
       objectReference: {fileID: 1419075732}
+    - target: {fileID: 135730232777987885, guid: bccf393ec308e2c40b8a1914470206db, type: 3}
+      propertyPath: equippedTool
+      value: 
+      objectReference: {fileID: 11400000, guid: 783bfaed1e959094592b198e5e0af901, type: 2}
     - target: {fileID: 6859409718953302850, guid: bccf393ec308e2c40b8a1914470206db, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

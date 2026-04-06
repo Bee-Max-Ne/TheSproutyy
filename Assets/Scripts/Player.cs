@@ -1,10 +1,22 @@
+﻿using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static Unity.Cinemachine.CinemachineSplineRoll;
 
 public class Player : MonoBehaviour
 {
+    public static Player Instance { get; private set; }
+
+    public event EventHandler<OnToolUsedEventArgs> OnToolUsed;
+
+    public class OnToolUsedEventArgs : EventArgs
+    {
+        public ToolType toolType;
+    }
+
     [SerializeField] private GameInput gameInput;
     [SerializeField] private float moveSpeed = 5.0f;
+    [SerializeField] private ToolSO equippedTool;
 
     private Rigidbody2D rb;
 
@@ -13,13 +25,48 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            Instance = this;
+        }
+
         rb = GetComponent<Rigidbody2D>();
+    }
+
+    private void Start()
+    {
+        gameInput.OnUseToolAction += GameInput_OnUseToolAction;
+    }
+
+    private void GameInput_OnUseToolAction(object sender, EventArgs e)
+    {
+        if (GetEquippedToolType() != ToolType.None && !isMoving)
+        {
+            // Phát sự kiện đi kèm với thông tin công cụ hiện tại
+            OnToolUsed?.Invoke(this, new OnToolUsedEventArgs
+            {
+                toolType = GetEquippedToolType()
+            });
+        }
     }
 
     void Update()
     {
         inputVector = gameInput.GetMovementVectorNormalized();
         isMoving = inputVector != Vector2.zero;
+
+        //if (Input.GetMouseButtonDown(0) && GetEquippedToolType() != ToolType.None && !isMoving)
+        //{
+        //    // Phát sự kiện đi kèm với thông tin công cụ hiện tại
+        //    OnToolUsed?.Invoke(this, new OnToolUsedEventArgs
+        //    {
+        //        toolType = GetEquippedToolType()
+        //    });
+        //}
     }
 
     private void FixedUpdate()
@@ -30,6 +77,11 @@ public class Player : MonoBehaviour
     private void HandleMovement()
     {
         rb.MovePosition(rb.position + inputVector * moveSpeed * Time.fixedDeltaTime);
+    }
+
+    public ToolType GetEquippedToolType()
+    {
+        return equippedTool != null ? equippedTool.toolType : ToolType.None;
     }
 
     public Vector2 GetInputVector()
