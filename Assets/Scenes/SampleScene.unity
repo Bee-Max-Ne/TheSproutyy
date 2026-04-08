@@ -69306,10 +69306,6 @@ PrefabInstance:
       propertyPath: gameInput
       value: 
       objectReference: {fileID: 1419075732}
-    - target: {fileID: 1825881019208286863, guid: bccf393ec308e2c40b8a1914470206db, type: 3}
-      propertyPath: m_SortingOrder
-      value: 6
-      objectReference: {fileID: 0}
     - target: {fileID: 6859409718953302850, guid: bccf393ec308e2c40b8a1914470206db, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

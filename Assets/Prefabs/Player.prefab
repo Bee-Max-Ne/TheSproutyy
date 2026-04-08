@@ -81,7 +81,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: 6
   m_MaskInteraction: 0
   m_Sprite: {fileID: 2537848567546242354, guid: 6b5a26d7b3379b240bf16edb26b815b3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -176,7 +176,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
   gameInput: {fileID: 0}
-  moveSpeed: 5
+  moveSpeed: 4
   equippedTool: {fileID: 11400000, guid: 783bfaed1e959094592b198e5e0af901, type: 2}
 --- !u!50 &5567006630849984997
 Rigidbody2D:
