@@ -46,7 +46,11 @@ public class Player : MonoBehaviour
     {
         if (GetEquippedToolType() != ToolType.None && !isMoving)
         {
-            // Phát sự kiện đi kèm với thông tin công cụ hiện tại
+            // Lấy vị trí của Indicator thay vì lấy vị trí chuột trực tiếp
+            Vector3 targetPos = GameObject.FindAnyObjectByType<PlayerIndicator>().transform.position;
+
+            Debug.Log("Sử dụng " + equippedTool.toolName + " tại " + targetPos);
+
             OnToolUsed?.Invoke(this, new OnToolUsedEventArgs
             {
                 toolType = GetEquippedToolType()
@@ -92,5 +96,10 @@ public class Player : MonoBehaviour
     public bool IsMoving()
     {
         return isMoving;
+    }
+
+    public int GetEquippedToolRange()
+    {
+        return equippedTool.interactRange;
     }
 }

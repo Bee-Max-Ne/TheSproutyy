@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ToolSO
   toolName: Watering Can
   toolType: 3
+  interactRange: 2
