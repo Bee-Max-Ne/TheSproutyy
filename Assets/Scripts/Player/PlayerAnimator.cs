@@ -69,4 +69,11 @@ public class PlayerAnimator : MonoBehaviour
         animator.SetInteger(TOOL_TYPE, (int)player.GetEquippedToolType());
         animator.SetTrigger(DO_ACTION);
     }
+
+    public void AnimationEvent_PerformAction()
+    {
+        // Khi hoạt ảnh rìu chém tới nơi, báo cho class Player biết để thực hiện việc trừ máu
+        // (Bạn cần viết thêm hàm PerformToolAction() hoặc DealDamage() bên class Player)
+        player.PerformToolAction();
+    }
 }

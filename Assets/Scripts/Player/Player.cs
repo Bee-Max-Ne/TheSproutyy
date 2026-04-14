@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
     }
 
     [SerializeField] private GameInput gameInput;
+    [SerializeField] private PlayerIndicator playerIndicator;
     [SerializeField] private float moveSpeed = 5.0f;
     [SerializeField] private ToolSO equippedTool;
 
@@ -22,6 +23,7 @@ public class Player : MonoBehaviour
 
     private Vector2 inputVector;
     private bool isMoving;
+    private ResourceNode targetResource;
 
     private void Awake()
     {
@@ -40,21 +42,35 @@ public class Player : MonoBehaviour
     private void Start()
     {
         gameInput.OnUseToolAction += GameInput_OnUseToolAction;
+        playerIndicator.OnSelectedResourceNodeChanged += PlayerIndicator_OnSelectedResourceNodeChanged;
+        
+    }
+
+    private void PlayerIndicator_OnSelectedResourceNodeChanged(object sender, PlayerIndicator.OnSelectedResourceNodeChangedEventArgs e)
+    {
+        targetResource = e.selectedResource;
     }
 
     private void GameInput_OnUseToolAction(object sender, EventArgs e)
     {
         if (!isMoving)
         {
-            // Lấy vị trí của Indicator thay vì lấy vị trí chuột trực tiếp
-            Vector3 targetPos = GameObject.FindAnyObjectByType<PlayerIndicator>().transform.position;
-
             OnToolUsed?.Invoke(this, new OnToolUsedEventArgs
             {
                 toolType = GetEquippedToolType()
             });
+        }
+    }
 
-            Debug.Log($"Player pos:{transform.position}, Indicator Pos: {targetPos}");
+    public void PerformToolAction()
+    {
+        // Kiểm tra xem trước mặt có mục tiêu nào không (cây, đá...)
+        if (targetResource != null)
+        {
+            ToolSO currentTool = equippedTool;
+
+            // Gây sát thương lên cái cây/cục đá
+            targetResource.TakeDamage(currentTool);
         }
     }
 
@@ -92,5 +108,10 @@ public class Player : MonoBehaviour
     public int GetEquippedToolRange()
     {
         return equippedTool.interactRange;
+    }
+
+    public void ClearTargetResource()
+    {
+        targetResource = null;
     }
 }

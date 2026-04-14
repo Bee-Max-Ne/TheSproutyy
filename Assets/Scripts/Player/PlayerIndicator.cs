@@ -1,7 +1,15 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerIndicator : MonoBehaviour
 {
+    public event EventHandler<OnSelectedResourceNodeChangedEventArgs> OnSelectedResourceNodeChanged;
+
+    public class OnSelectedResourceNodeChangedEventArgs : EventArgs
+    {
+        public ResourceNode selectedResource;
+    }
+
     [Header("References")]
     [SerializeField] private Player player;
 
@@ -14,6 +22,12 @@ public class PlayerIndicator : MonoBehaviour
 
     [Tooltip("Nếu true, hiện indicator cả khi tay không (None).")]
     [SerializeField] private bool showOnNone = true;
+
+    [Header("Detection Settings")]
+    [Tooltip("Chỉ định Layer chứa cây cối/vật thể tương tác (ví dụ: Layer 'Interactable')")]
+    [SerializeField] private LayerMask interactableLayerMask;
+
+    private ResourceNode currentSelectedResource;
 
     private SpriteRenderer spriteRenderer;
     private Camera mainCamera;
@@ -74,5 +88,34 @@ public class PlayerIndicator : MonoBehaviour
             targetY + indicatorGridOffset,
             0f
         );
+
+        // 7. Kiểm tra nếu có ResourceNode nào ở vị trí này
+        CheckForResourceAtIndicator();
+    }
+
+    private void CheckForResourceAtIndicator()
+    {
+        // Dùng OverlapPoint tại tâm của Indicator. 
+        // Lọc bằng LayerMask để tăng hiệu năng và tránh chạm nhầm mặt đất.
+        Collider2D hit = Physics2D.OverlapPoint(transform.position, interactableLayerMask);
+
+        ResourceNode newlySelectedResource = null;
+
+        if (hit != null)
+        {
+            newlySelectedResource = hit.GetComponent<ResourceNode>();
+        }
+
+        // CHỈ gọi event nếu mục tiêu bị thay đổi (tránh spam event mỗi frame)
+        if (newlySelectedResource != currentSelectedResource)
+        {
+            currentSelectedResource = newlySelectedResource;
+
+            // Kích hoạt Event, gửi kèm dữ liệu
+            OnSelectedResourceNodeChanged?.Invoke(this, new OnSelectedResourceNodeChangedEventArgs
+            {
+                selectedResource = currentSelectedResource
+            });
+        }
     }
 }

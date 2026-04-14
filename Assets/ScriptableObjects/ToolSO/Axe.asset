@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ToolSO
   toolName: Axe
   toolType: 1
+  interactRange: 1
+  power: 10
