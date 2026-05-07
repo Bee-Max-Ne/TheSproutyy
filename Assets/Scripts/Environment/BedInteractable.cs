@@ -27,6 +27,10 @@ public class BedInteractable : MonoBehaviour, IInteractable, IUsable
         if (DayCycleManager.Instance != null)
             DayCycleManager.Instance.OnSleepEnded += HandleSleepEnded;
 
+        // Always place player at wakeUpPoint on scene load.
+        // Covers both: fresh start and load-from-save (save happens at sleep,
+        // so player always wakes up here regardless of where they fell asleep).
+        MovePlayerToWakeUpPoint();
         SetHighlight(false);
     }
 
@@ -62,7 +66,9 @@ public class BedInteractable : MonoBehaviour, IInteractable, IUsable
     // Private methods
     // ----------------------------------------------------------
 
-    private void HandleSleepEnded(object sender, EventArgs e)
+    private void HandleSleepEnded(object sender, EventArgs e) => MovePlayerToWakeUpPoint();
+
+    private void MovePlayerToWakeUpPoint()
     {
         if (wakeUpPoint == null || Player.Instance == null) return;
         Player.Instance.transform.position = wakeUpPoint.position;

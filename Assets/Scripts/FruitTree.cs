@@ -18,14 +18,42 @@ public class FruitTree : Tree
     [Header("Fruit Sprites")]
     [SerializeField] private Animator fruitTreeAnimator;
 
+    [Header("Save/Load")]
+    [Tooltip("Tên Animator state hiển thị cây không có trái (dùng khi load). " +
+             "Phải khớp chính xác tên state trong Animator Controller.")]
+    [SerializeField] private string noFruitIdleStateName = "TimberTree_Idle";
+
     private bool _hasFruit = true;
 
     private const string PARAM_FRUIT_SHAKE = "FruitShake";
     private const string PARAM_FRUIT_DROP = "FruitDrop";
     private const string PARAM_NO_FRUIT = "NoFruitShake";
 
-    // Dùng lại ANIM_FALL từ Tree thông qua TreeAnimator
     protected override Animator TreeAnimator => fruitTreeAnimator;
+
+    // ----------------------------------------------------------
+    // Save/Load overrides
+    // ----------------------------------------------------------
+
+    /// <summary>Exposes fruit state for SaveManager to snapshot.</summary>
+    public override bool HasFruit => _hasFruit;
+
+    /// <summary>
+    /// Restores the fruitless state without playing animations or dropping items.
+    /// Called by SaveManager when loading a session where fruit was already lost.
+    /// </summary>
+    public override void LoadFruitlessState()
+    {
+        _hasFruit = false;
+        SwitchToFallRecipe();
+
+        // Jump directly to the no-fruit idle visual — no drop animation on load.
+        if (fruitTreeAnimator != null && !string.IsNullOrEmpty(noFruitIdleStateName))
+            fruitTreeAnimator.Play(noFruitIdleStateName, 0, 0f);
+        else
+            Debug.LogWarning($"[FruitTree] noFruitIdleStateName is empty on '{name}'. " +
+                             "Set it in the Inspector to restore the correct sprite on load.");
+    }
 
     protected override void OnHit(ToolSO playerTool)
     {

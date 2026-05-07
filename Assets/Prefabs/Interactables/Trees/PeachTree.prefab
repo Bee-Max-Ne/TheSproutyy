@@ -94,6 +94,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FruitTree
   resourceNodeSO: {fileID: 11400000, guid: b16582f3c4cc7034a833776b38585539, type: 2}
   <harvestRecipeSO>k__BackingField: {fileID: 11400000, guid: 9590825efb273a84eb901da838437945, type: 2}
+  nodeID: 
   fallDuration: 1
   fallRecipeSO: {fileID: 11400000, guid: bd8b805bb1cf83e49b694c4604be29dc, type: 2}
   fruitDropOnHit:
@@ -103,6 +104,7 @@ MonoBehaviour:
     dropChance: 30
   fruitDropTriggerChance: 40
   fruitTreeAnimator: {fileID: 8147880596643075296}
+  noFruitIdleStateName: TimberTree_Idle
 --- !u!1 &7058912514963034033
 GameObject:
   m_ObjectHideFlags: 0

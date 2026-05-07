@@ -129,6 +129,20 @@ public class DayCycleManager : MonoBehaviour
         FireHoursChanged(fromHour, hours);
     }
 
+    /// <summary>
+    /// Called by SaveManager on load to restore the saved day.
+    /// Resets hour to wakeUpHour and fires OnDayPassed so UI (ClockUI etc.) refreshes.
+    /// </summary>
+    public void LoadDay(int day)
+    {
+        _currentDay  = day;
+        _currentHour = dayCycleConfig.wakeUpHour;
+        _lastHour    = dayCycleConfig.wakeUpHour;
+
+        // Notify all subscribers (ClockUI, FarmTileManager, etc.) of the restored day.
+        OnDayPassed?.Invoke(this, _currentDay);
+    }
+
     /// <summary>Returns a formatted string "HH:MM" for the current game time.</summary>
     public string GetFormattedTime()
     {

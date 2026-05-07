@@ -54,6 +54,9 @@ public class FarmTileManager : MonoBehaviour, IInteractable, ITillable, IWaterab
     /// <summary>Spawned tilled-mark GameObjects keyed by cell position.</summary>
     private readonly Dictionary<Vector3Int, GameObject> _tilledMarks = new();
 
+    /// <summary>Live CropObjects keyed by cell. Maintained so CaptureFarmData() can snapshot them.</summary>
+    private readonly Dictionary<Vector3Int, CropObject> _cropObjects = new();
+
     /// <summary>Cells that have been watered this day.</summary>
     private readonly HashSet<Vector3Int> _wateredCells = new();
 
@@ -109,6 +112,7 @@ public class FarmTileManager : MonoBehaviour, IInteractable, ITillable, IWaterab
         {
             case FarmTileState.GrassDirt: SetState(cell, FarmTileState.Dirt);       break;
             case FarmTileState.Dirt:      SetState(cell, FarmTileState.TilledDirt); break;
+            case FarmTileState.HasCrop:   return; // cannot hoe a tile with a crop
         }
     }
 
@@ -120,18 +124,7 @@ public class FarmTileManager : MonoBehaviour, IInteractable, ITillable, IWaterab
     /// Waters the cell under the PlayerIndicator if it is Dirt or TilledDirt.
     /// GrassDirt cannot be watered. Already-watered cells are ignored.
     /// </summary>
-    public void Water(ToolSO tool)
-    {
-        Vector3Int cell  = GetIndicatorCell();
-        FarmTileState state = GetState(cell);
-
-        if (state == FarmTileState.GrassDirt)  return;
-        if (_wateredCells.Contains(cell))       return;
-
-        _wateredCells.Add(cell);
-        _tilemap.SetColor(cell, wateredTint);
-        ApplyTintToMark(cell, wateredTint);
-    }
+    public void Water(ToolSO tool) => ApplyWater(GetIndicatorCell());
 
     // ----------------------------------------------------------
     // Public API
@@ -182,6 +175,7 @@ public class FarmTileManager : MonoBehaviour, IInteractable, ITillable, IWaterab
         GameObject cropGO   = Instantiate(cropObjectPrefab, worldCenter, Quaternion.identity);
         CropObject crop     = cropGO.GetComponent<CropObject>();
         crop.Initialise(seed.cropData, this, cell);
+        _cropObjects[cell] = crop;
 
         SetState(cell, FarmTileState.HasCrop);
 
@@ -191,16 +185,7 @@ public class FarmTileManager : MonoBehaviour, IInteractable, ITillable, IWaterab
     /// Directly waters a specific cell. Called by CropObject.Water()
     /// when the crop is the detected IInteractable target.
     /// </summary>
-    public void SetWatered(Vector3Int cell)
-    {
-        FarmTileState state = GetState(cell);
-        if (state == FarmTileState.GrassDirt)  return;
-        if (_wateredCells.Contains(cell))       return;
-
-        _wateredCells.Add(cell);
-        _tilemap.SetColor(cell, wateredTint);
-        ApplyTintToMark(cell, wateredTint);
-    }
+    public void SetWatered(Vector3Int cell) => ApplyWater(cell);
 
     /// <summary>
     /// Sets a cell to a given state, updates tile visuals and manages tilled marks.
@@ -217,6 +202,7 @@ public class FarmTileManager : MonoBehaviour, IInteractable, ITillable, IWaterab
                 _tileStates.Remove(cell);
                 _dirtCreatedAtHour.Remove(cell);
                 _wateredCells.Remove(cell);
+                _cropObjects.Remove(cell);
                 break;
 
             case FarmTileState.Dirt:
@@ -226,6 +212,7 @@ public class FarmTileManager : MonoBehaviour, IInteractable, ITillable, IWaterab
                 RemoveTilledMark(cell);
                 _tileStates[cell]        = FarmTileState.Dirt;
                 _dirtCreatedAtHour[cell] = GetTotalGameHour();
+                _cropObjects.Remove(cell);
                 break;
 
             case FarmTileState.TilledDirt:
@@ -246,6 +233,93 @@ public class FarmTileManager : MonoBehaviour, IInteractable, ITillable, IWaterab
     public Vector3Int WorldToCell(Vector3 worldPosition)
     {
         return _tilemap.WorldToCell(worldPosition);
+    }
+
+    /// <summary>
+    /// Snapshots all non-default tile states and live crop objects.
+    /// Called by SaveManager.CaptureFarm().
+    /// </summary>
+    public FarmSaveData CaptureFarmData()
+    {
+        FarmSaveData data = new FarmSaveData();
+
+        foreach (KeyValuePair<Vector3Int, FarmTileState> kvp in _tileStates)
+        {
+            Vector3Int    cell  = kvp.Key;
+            FarmTileState state = kvp.Value;
+
+            data.cells.Add(new FarmCellSaveData
+            {
+                cell              = cell,
+                state             = (int)state,
+                isWatered         = _wateredCells.Contains(cell),
+                dirtCreatedAtHour = _dirtCreatedAtHour.TryGetValue(cell, out int h) ? h : -1
+            });
+        }
+
+        foreach (KeyValuePair<Vector3Int, CropObject> kvp in _cropObjects)
+        {
+            if (kvp.Value == null) continue;
+            CropSaveData cropData = kvp.Value.CaptureSaveData();
+            if (cropData != null) data.crops.Add(cropData);
+        }
+
+        return data;
+    }
+
+    /// <summary>
+    /// Restores tile states and re-spawns CropObjects from save data.
+    /// Called by SaveManager.RestoreFarm() — must run after RestoreTime().
+    /// </summary>
+    public void LoadFromSave(FarmSaveData data, ItemRegistrySO registry)
+    {
+        // ── Restore tile states ──────────────────────────────────
+        foreach (FarmCellSaveData cellData in data.cells)
+        {
+            Vector3Int    cell  = cellData.cell;
+            FarmTileState state = (FarmTileState)cellData.state;
+
+            // All non-GrassDirt cells use dirtTile as the underlying visual
+            _tilemap.SetTile(cell, dirtTile);
+            _tileStates[cell] = state;
+
+            switch (state)
+            {
+                case FarmTileState.Dirt:
+                    if (cellData.dirtCreatedAtHour >= 0)
+                        _dirtCreatedAtHour[cell] = cellData.dirtCreatedAtHour;
+                    break;
+
+                case FarmTileState.TilledDirt:
+                    SpawnTilledMark(cell);
+                    break;
+
+                // HasCrop: tile visual set above; CropObject spawned separately below
+            }
+
+            // isWatered intentionally NOT restored:
+            // save fires at OnSleepStarted (before OnDayPassed clears water),
+            // but load always means a fresh morning — water state resets each day.
+        }
+
+        // ── Re-spawn CropObjects ─────────────────────────────────
+        foreach (CropSaveData cropData in data.crops)
+        {
+            CropDataSO cropSO = registry.GetCrop(cropData.cropDataName);
+            if (cropSO == null) continue;
+
+            Vector3Int cell       = cropData.cell;
+            Vector3    worldPos   = _tilemap.GetCellCenterWorld(cell);
+            GameObject cropGO     = Instantiate(cropObjectPrefab, worldPos, Quaternion.identity);
+            CropObject crop       = cropGO.GetComponent<CropObject>();
+
+            crop.InitialiseFromSave(cropSO, this, cell,
+                cropData.currentStageIndex,
+                cropData.hoursAccumulated,
+                cropData.isMature);
+
+            _cropObjects[cell] = crop;
+        }
     }
 
     // ----------------------------------------------------------
@@ -296,6 +370,16 @@ public class FarmTileManager : MonoBehaviour, IInteractable, ITillable, IWaterab
     private Vector3Int GetIndicatorCell()
     {
         return _tilemap.WorldToCell(playerIndicator.transform.position);
+    }
+
+    private void ApplyWater(Vector3Int cell)
+    {
+        if (GetState(cell) == FarmTileState.GrassDirt) return;
+        if (_wateredCells.Contains(cell))              return;
+
+        _wateredCells.Add(cell);
+        _tilemap.SetColor(cell, wateredTint);
+        ApplyTintToMark(cell, wateredTint);
     }
 
     private void SpawnTilledMark(Vector3Int cell)

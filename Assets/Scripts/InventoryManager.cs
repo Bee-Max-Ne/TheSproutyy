@@ -122,4 +122,32 @@ public class InventoryManager : MonoBehaviour
         (itemSlots[indexA], itemSlots[indexB]) = (itemSlots[indexB], itemSlots[indexA]);
         OnInventoryChanged?.Invoke(this, EventArgs.Empty);
     }
+
+    /// <summary>
+    /// Clears all slots and restores them directly from save data.
+    /// Preserves exact slot positions (index-to-index mapping).
+    /// Called by SaveManager on load.
+    /// </summary>
+    public void LoadFromSave(System.Collections.Generic.List<ItemSlotSaveData> savedSlots,
+                             ItemRegistrySO registry)
+    {
+        // Clear every slot first
+        foreach (ItemSlot slot in itemSlots)
+            slot.ClearSlot();
+
+        int count = Mathf.Min(savedSlots.Count, itemSlots.Length);
+        for (int i = 0; i < count; i++)
+        {
+            ItemSlotSaveData saved = savedSlots[i];
+            if (string.IsNullOrEmpty(saved.itemName)) continue;  // empty slot
+
+            ItemSO item = registry.GetItem(saved.itemName);
+            if (item == null) continue;  // warning already logged by registry
+
+            itemSlots[i].SetItem(item);
+            itemSlots[i].AddQuantity(saved.quantity);
+        }
+
+        OnInventoryChanged?.Invoke(this, EventArgs.Empty);
+    }
 }

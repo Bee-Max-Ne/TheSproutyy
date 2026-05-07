@@ -47,18 +47,53 @@ public class CropObject : MonoBehaviour, IInteractable, IDroppable, IUsable, IWa
     // ----------------------------------------------------------
 
     /// <summary>
-    /// Initialises the crop. Called by FarmTileManager after spawning.
+    /// Initialises the crop fresh. Called by FarmTileManager.Plant() after spawning.
     /// </summary>
     public void Initialise(CropDataSO data, FarmTileManager tileManager, Vector3Int cell)
     {
-        _data             = data;
-        _tileManager      = tileManager;
-        _cell             = cell;
+        _data              = data;
+        _tileManager       = tileManager;
+        _cell              = cell;
         _currentStageIndex = 0;
         _hoursAccumulated  = 0f;
         _isMature          = false;
 
         UpdateSprite();
+    }
+
+    /// <summary>
+    /// Restores crop state from save data. Called by FarmTileManager.LoadFromSave()
+    /// immediately after Instantiate — before Start() runs.
+    /// </summary>
+    public void InitialiseFromSave(CropDataSO data, FarmTileManager tileManager,
+                                   Vector3Int cell, int stageIndex,
+                                   float hoursAccumulated, bool isMature)
+    {
+        _data              = data;
+        _tileManager       = tileManager;
+        _cell              = cell;
+        _currentStageIndex = stageIndex;
+        _hoursAccumulated  = hoursAccumulated;
+        _isMature          = isMature;
+
+        UpdateSprite();
+    }
+
+    /// <summary>
+    /// Captures current growth state for saving. Called by FarmTileManager.CaptureFarmData().
+    /// </summary>
+    public CropSaveData CaptureSaveData()
+    {
+        if (_data == null) return null;
+
+        return new CropSaveData
+        {
+            cell              = _cell,
+            cropDataName      = _data.name,
+            currentStageIndex = _currentStageIndex,
+            hoursAccumulated  = _hoursAccumulated,
+            isMature          = _isMature
+        };
     }
 
     // ----------------------------------------------------------
@@ -164,6 +199,7 @@ public class CropObject : MonoBehaviour, IInteractable, IDroppable, IUsable, IWa
         Destroy(gameObject);
     }
 
+    // NOTE: duplicated from ResourceNode.SpawnDrops() — refactor to shared utility when scope grows
     private void SpawnDrops(DropEntry entry, int amount)
     {
         if (entry.item?.prefab == null) return;

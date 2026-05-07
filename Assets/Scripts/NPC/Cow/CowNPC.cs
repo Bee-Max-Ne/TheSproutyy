@@ -63,8 +63,9 @@ public class CowNPC : BaseAnimalNPC, IInteractable
             _happyCooldownTimer -= Time.deltaTime;
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         if (Player.Instance != null)
             Player.Instance.OnToolUsed -= OnPlayerUsedTool;
     }
