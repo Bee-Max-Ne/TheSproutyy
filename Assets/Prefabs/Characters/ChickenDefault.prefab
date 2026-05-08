@@ -89,10 +89,7 @@ MonoBehaviour:
   animalData: {fileID: 0}
   npcID: 
   chickenData: {fileID: 11400000, guid: 28a387be9d69d1249aa2613092582247, type: 2}
-  nests:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  nests: []
 --- !u!195 &2577331606792935046
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -177,7 +174,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0.02, y: 0.2}
-  m_Radius: 0.5
+  m_Radius: 1
 --- !u!1 &6404339040373558656
 GameObject:
   m_ObjectHideFlags: 0

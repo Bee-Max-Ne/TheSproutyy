@@ -77,13 +77,9 @@ public static class ResourceNodeIDTool
 
     private static string GetHierarchyPath(Transform t)
     {
-        string path = t.name;
-        while (t.parent != null)
-        {
-            t    = t.parent;
-            path = t.name + "/" + path;
-        }
-        return path;
+        // Use world position to make duplicate-named objects unique.
+        // ResourceNodes are map-placed and never move, so position is a stable key.
+        return $"{t.name}@({t.position.x:F1},{t.position.y:F1})";
     }
 
     // ──────────────────────────────────────────────────────────

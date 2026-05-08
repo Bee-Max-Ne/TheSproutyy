@@ -52,7 +52,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -66,7 +66,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -90,7 +90,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -119,16 +119,24 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 47
-        width: 17
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        y: 48
+        width: 16
+        height: 16
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
-      physicsShape: []
-      tessellationDetail: -1
+      physicsShape:
+      - - {x: 8, y: -6}
+        - {x: 8, y: -2}
+        - {x: 6, y: -2}
+        - {x: -1, y: -2}
+        - {x: -8, y: -2}
+        - {x: -8, y: -6}
+        - {x: -7, y: -7}
+        - {x: 7, y: -7}
+      tessellationDetail: 0
       bones: []
       spriteID: e97efa5be6d4b9270800000000000000
       internalID: 8258279479603881886
@@ -140,17 +148,29 @@ TextureImporter:
       name: Barn structures_1
       rect:
         serializedVersion: 2
-        x: 0
-        y: 32
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 20
+        y: 35
+        width: 24
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.4}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
-      physicsShape: []
-      tessellationDetail: -1
+      physicsShape:
+      - - {x: 4, y: -11}
+        - {x: 4, y: -2}
+        - {x: 4, y: -2}
+        - {x: 11, y: -2}
+        - {x: 12, y: -1}
+        - {x: 12, y: 3}
+        - {x: -4, y: 3}
+        - {x: -11, y: 3}
+        - {x: -12, y: 2}
+        - {x: -12, y: -5}
+        - {x: -12, y: -12}
+        - {x: 3, y: -12}
+      tessellationDetail: 0
       bones: []
       spriteID: b8339d4c54e85e930800000000000000
       internalID: 4171897060135089035
@@ -162,17 +182,24 @@ TextureImporter:
       name: Barn structures_2
       rect:
         serializedVersion: 2
-        x: 19
-        y: 34
-        width: 26
-        height: 28
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 33
+        width: 16
+        height: 14
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
-      physicsShape: []
-      tessellationDetail: -1
+      physicsShape:
+      - - {x: 7, y: -5}
+        - {x: 7, y: -2}
+        - {x: 0, y: -2}
+        - {x: -7, y: -2}
+        - {x: -7, y: -5}
+        - {x: -7, y: -6}
+        - {x: 7, y: -6}
+      tessellationDetail: 0
       bones: []
       spriteID: d71a09bfb7af53c30800000000000000
       internalID: 4338649226449822077
@@ -184,17 +211,21 @@ TextureImporter:
       name: Barn structures_3
       rect:
         serializedVersion: 2
-        x: 0
-        y: 16
-        width: 30
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1
+        y: 17
+        width: 28
+        height: 14
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
-      physicsShape: []
-      tessellationDetail: -1
+      physicsShape:
+      - - {x: 13, y: -2}
+        - {x: -13, y: -2}
+        - {x: -13, y: -6}
+        - {x: 13, y: -6}
+      tessellationDetail: 0
       bones: []
       spriteID: c7db17201a8f7af80800000000000000
       internalID: -8095228434760745604
@@ -206,17 +237,17 @@ TextureImporter:
       name: Barn structures_4
       rect:
         serializedVersion: 2
-        x: 1
-        y: 2
-        width: 13
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 2
+        y: 3
+        width: 11
+        height: 10
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
       spriteID: 9e315c93fbbea56b0800000000000000
       internalID: -5306670004362210327
@@ -228,17 +259,17 @@ TextureImporter:
       name: Barn structures_5
       rect:
         serializedVersion: 2
-        x: 15
-        y: 0
-        width: 18
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 16
+        y: 1
+        width: 16
+        height: 13
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
       spriteID: 7809333603afbec00800000000000000
       internalID: 931112833711837319
@@ -250,7 +281,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: f5bee8f8b1af389479bf72bdd50a56c3
     internalID: 0
     vertices: []
     indices: 
@@ -258,7 +289,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.30000001192092898},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":9,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       Barn structures_0: 8258279479603881886
       Barn structures_1: 4171897060135089035
