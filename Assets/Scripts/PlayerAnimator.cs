@@ -20,6 +20,7 @@ public class PlayerAnimator : MonoBehaviour
     // Inspector fields
     // ----------------------------------------------------------
     [SerializeField] private Player player;
+    [SerializeField] private WateringEffectController wateringEffect;
 
     // ----------------------------------------------------------
     // Private state
@@ -55,6 +56,29 @@ public class PlayerAnimator : MonoBehaviour
     public void AnimationEvent_PerformAction()
     {
         player.PerformToolAction();
+    }
+
+    /// <summary>
+    /// Called by the Animator at the raise-can frame of the watering animation.
+    /// Reads current facing direction and plays the matching spray effect.
+    /// </summary>
+    public void AnimationEvent_PlayWateringEffect()
+    {
+        if (wateringEffect == null) return;
+
+        float h = _animator.GetFloat(PARAM_HORIZONTAL);
+        float v = _animator.GetFloat(PARAM_VERTICAL);
+
+        // Back direction — player sprite covers the effect, skip entirely
+        if (Mathf.Abs(v) > Mathf.Abs(h) && v > 0f) return;
+
+        WateringDirection dir;
+        if (Mathf.Abs(h) > Mathf.Abs(v))
+            dir = h > 0f ? WateringDirection.Right : WateringDirection.Left;
+        else
+            dir = WateringDirection.Front;
+
+        wateringEffect.Play(dir);
     }
 
     /// <summary>Called by the Animator at the last frame of each tool animation.
