@@ -38,6 +38,14 @@ public class FarmTileManager : MonoBehaviour, IInteractable, ITillable, IWaterab
     [Tooltip("Tint applied to a cell when watered. Pure dark grey = just darker, no hue shift.")]
     [SerializeField] private Color wateredTint = new Color(0.6f, 0.6f, 0.6f, 1f);
 
+    [Header("Blocking Tilemaps")]
+    [Tooltip("Cells with a tile on any of these tilemaps cannot be tilled.")]
+    [SerializeField] private List<Tilemap> blockedTilemaps = new();
+
+    [Header("Foliage")]
+    [Tooltip("Foliage tile on this tilemap is removed when a cell is first tilled (GrassDirt → Dirt).")]
+    [SerializeField] private Tilemap foliageTilemap;
+
     [Header("Settings")]
     [Tooltip("In-game hours before an untilled Dirt cell reverts back to GrassDirt.")]
     [SerializeField] private int dirtRevertHours = 24;
@@ -107,10 +115,14 @@ public class FarmTileManager : MonoBehaviour, IInteractable, ITillable, IWaterab
     {
         Vector3Int cell = GetIndicatorCell();
         if (_tilemap.GetTile(cell) == null) return;
+        if (IsCellBlocked(cell))            return;
 
         switch (GetState(cell))
         {
-            case FarmTileState.GrassDirt: SetState(cell, FarmTileState.Dirt);       break;
+            case FarmTileState.GrassDirt:
+                ClearFoliage(cell);
+                SetState(cell, FarmTileState.Dirt);
+                break;
             case FarmTileState.Dirt:      SetState(cell, FarmTileState.TilledDirt); break;
             case FarmTileState.HasCrop:   return; // cannot hoe a tile with a crop
         }
@@ -397,6 +409,21 @@ public class FarmTileManager : MonoBehaviour, IInteractable, ITillable, IWaterab
         if (!_tilledMarks.TryGetValue(cell, out GameObject mark)) return;
         if (mark != null) Destroy(mark);
         _tilledMarks.Remove(cell);
+    }
+
+    /// <summary>Returns true if any blocking tilemap has a tile at the given cell.</summary>
+    private bool IsCellBlocked(Vector3Int cell)
+    {
+        foreach (Tilemap blocked in blockedTilemaps)
+            if (blocked != null && blocked.GetTile(cell) != null) return true;
+        return false;
+    }
+
+    /// <summary>Removes the foliage tile at the given cell, if the foliage tilemap is assigned.</summary>
+    private void ClearFoliage(Vector3Int cell)
+    {
+        if (foliageTilemap == null) return;
+        foliageTilemap.SetTile(cell, null);
     }
 
     private void ApplyTintToMark(Vector3Int cell, Color tint)
