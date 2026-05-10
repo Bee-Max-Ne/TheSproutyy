@@ -54,6 +54,7 @@ public class PlayerIndicator : MonoBehaviour
     {
         UpdateVisibility();
         if (!_spriteRenderer.enabled) return;
+        if (player.IsPerformingAction) return;
 
         SnapToGrid();
         DetectInteractable();

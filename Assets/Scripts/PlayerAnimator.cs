@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class PlayerAnimator : MonoBehaviour
 {
@@ -25,6 +26,7 @@ public class PlayerAnimator : MonoBehaviour
     // ----------------------------------------------------------
     private Animator _animator;
     private PlayerIndicator _indicator;
+    private Coroutine _unlockRoutine;
 
     // ----------------------------------------------------------
     // Unity lifecycle
@@ -46,12 +48,25 @@ public class PlayerAnimator : MonoBehaviour
     }
 
     // ----------------------------------------------------------
-    // Animation event — called by the Animator at the
-    // exact frame the tool should make contact.
+    // Animation events
     // ----------------------------------------------------------
+
+    /// <summary>Called by the Animator at the exact frame the tool makes contact.</summary>
     public void AnimationEvent_PerformAction()
     {
         player.PerformToolAction();
+    }
+
+    /// <summary>Called by the Animator at the last frame of each tool animation.
+    /// Unlocks player movement and indicator immediately via animation event.</summary>
+    public void AnimationEvent_ActionComplete()
+    {
+        if (_unlockRoutine != null)
+        {
+            StopCoroutine(_unlockRoutine);
+            _unlockRoutine = null;
+        }
+        player.UnlockAction();
     }
 
     // ----------------------------------------------------------
@@ -74,6 +89,12 @@ public class PlayerAnimator : MonoBehaviour
     {
         SetFacingTowardIndicator();
         TriggerToolAnimation(e.ToolType);
+
+        if (e.ToolType != ToolType.None && e.ToolType != ToolType.SeedBag)
+        {
+            if (_unlockRoutine != null) StopCoroutine(_unlockRoutine);
+            _unlockRoutine = StartCoroutine(WaitForActionCompleteRoutine());
+        }
     }
 
     private void SetFacingTowardIndicator()
@@ -91,6 +112,29 @@ public class PlayerAnimator : MonoBehaviour
 
         _animator.SetFloat(PARAM_HORIZONTAL, direction.x);
         _animator.SetFloat(PARAM_VERTICAL, direction.y);
+    }
+
+    /// <summary>
+    /// Fallback: waits until the animator exits the current action state,
+    /// then unlocks if AnimationEvent_ActionComplete was not called.
+    /// </summary>
+    private IEnumerator WaitForActionCompleteRoutine()
+    {
+        // Wait two frames for the trigger to be consumed and transition to begin
+        yield return null;
+        yield return null;
+
+        int actionStateHash = _animator.GetCurrentAnimatorStateInfo(0).fullPathHash;
+
+        // Wait until we leave the action state
+        while (_animator.GetCurrentAnimatorStateInfo(0).fullPathHash == actionStateHash
+               || _animator.IsInTransition(0))
+        {
+            yield return null;
+        }
+
+        _unlockRoutine = null;
+        player.UnlockAction();
     }
 
     private void TriggerToolAnimation(ToolType toolType)

@@ -41,12 +41,14 @@ public class Player : MonoBehaviour
     private Vector2 _inputVector;
     private IInteractable _currentTarget;
     private bool _isPointerOverUI;
+    private bool _isPerformingAction;
 
     // ----------------------------------------------------------
     // Read-only properties
     // ----------------------------------------------------------
-    public bool IsMoving => _inputVector != Vector2.zero;
-    public Vector2 InputVector => _inputVector;
+    public bool IsMoving             => _inputVector != Vector2.zero;
+    public bool IsPerformingAction   => _isPerformingAction;
+    public Vector2 InputVector       => _inputVector;
 
     public ToolType EquippedToolType => equippedTool.toolType;
 
@@ -90,8 +92,9 @@ public class Player : MonoBehaviour
     private void Update()
     {
         _isPointerOverUI = EventSystem.current.IsPointerOverGameObject();
-        _inputVector = gameInput.GetMovementVectorNormalized();
-        
+        _inputVector = _isPerformingAction
+            ? Vector2.zero
+            : gameInput.GetMovementVectorNormalized();
     }
 
     private void FixedUpdate()
@@ -143,6 +146,12 @@ public class Player : MonoBehaviour
         _currentTarget = null;
     }
 
+    /// <summary>Locks movement and indicator for the duration of a tool animation.</summary>
+    public void LockAction()   => _isPerformingAction = true;
+
+    /// <summary>Unlocks movement and indicator. Called by AnimationEvent_ActionComplete.</summary>
+    public void UnlockAction() => _isPerformingAction = false;
+
     
 
     // ----------------------------------------------------------
@@ -163,6 +172,10 @@ public class Player : MonoBehaviour
         if (noAnimationEvent)
         {
             PerformToolAction();
+        }
+        else
+        {
+            LockAction();
         }
     }
 
