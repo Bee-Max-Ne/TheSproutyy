@@ -21,6 +21,7 @@ public class PlayerAnimator : MonoBehaviour
     // ----------------------------------------------------------
     [SerializeField] private Player player;
     [SerializeField] private WateringEffectController wateringEffect;
+    [SerializeField] private SpriteRenderer spriteRenderer;
 
     // ----------------------------------------------------------
     // Private state
@@ -112,6 +113,7 @@ public class PlayerAnimator : MonoBehaviour
     private void OnToolUsed(object sender, Player.ToolUsedEventArgs e)
     {
         SetFacingTowardIndicator();
+        ApplySideFlip(e.ToolType);
         TriggerToolAnimation(e.ToolType);
 
         if (e.ToolType != ToolType.None && e.ToolType != ToolType.SeedBag)
@@ -167,5 +169,21 @@ public class PlayerAnimator : MonoBehaviour
 
         _animator.SetInteger(PARAM_TOOL_TYPE, (int)toolType);
         _animator.SetTrigger(PARAM_DO_ACTION);
+    }
+
+    /// <summary>
+    /// Flips the sprite horizontally for tools that only have a Side clip
+    /// (no separate Left/Right clips). Other tools are unaffected.
+    /// </summary>
+    private void ApplySideFlip(ToolType toolType)
+    {
+        if (spriteRenderer == null) return;
+
+        bool isSideOnlyTool = toolType == ToolType.FishingRod;
+        if (!isSideOnlyTool) return;
+
+        float h = _animator.GetFloat(PARAM_HORIZONTAL);
+        // Side clip faces left by default → flip when facing right
+        spriteRenderer.flipX = h > 0f;
     }
 }

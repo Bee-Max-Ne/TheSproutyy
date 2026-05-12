@@ -367,6 +367,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimator
   player: {fileID: 656147129802342375}
   wateringEffect: {fileID: 5151961515505622235}
+  spriteRenderer: {fileID: 6751303949695474086}
 --- !u!1 &4821889753901417574
 GameObject:
   m_ObjectHideFlags: 0
