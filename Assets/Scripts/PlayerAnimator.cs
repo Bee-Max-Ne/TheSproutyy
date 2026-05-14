@@ -11,6 +11,9 @@ public class PlayerAnimator : MonoBehaviour
     private const string PARAM_SPEED = "Speed";
     private const string PARAM_TOOL_TYPE = "ToolType";
     private const string PARAM_DO_ACTION = "DoAction";
+    private const string PARAM_FISHING_REEL      = "Fishing_Reel";
+    private const string PARAM_FISHING_EXIT      = "Fishing_Exit";
+    private const string PARAM_IS_FISHING_ON_WATER = "IsFishingOnWater";
 
     // Player body offset so direction is calculated from chest,
     // not from feet.
@@ -21,6 +24,7 @@ public class PlayerAnimator : MonoBehaviour
     // ----------------------------------------------------------
     [SerializeField] private Player player;
     [SerializeField] private WateringEffectController wateringEffect;
+    [SerializeField] private FishingController fishingController;
     [SerializeField] private SpriteRenderer spriteRenderer;
 
     // ----------------------------------------------------------
@@ -82,6 +86,20 @@ public class PlayerAnimator : MonoBehaviour
         wateringEffect.Play(dir);
     }
 
+    /// <summary>Called by Animation Event on the last frame of Fishing_Cast clips.
+    /// Signals FishingController that the cast animation has finished.</summary>
+    public void AnimationEvent_CastComplete()
+    {
+        fishingController?.OnCastComplete();
+    }
+
+    /// <summary>Called by Animation Event on the last frame of Fishing_Happy clip.
+    /// Signals FishingController that the full catch sequence has finished.</summary>
+    public void AnimationEvent_FishingComplete()
+    {
+        fishingController?.OnFishingComplete();
+    }
+
     /// <summary>Called by the Animator at the last frame of each tool animation.
     /// Unlocks player movement and indicator immediately via animation event.</summary>
     public void AnimationEvent_ActionComplete()
@@ -108,15 +126,29 @@ public class PlayerAnimator : MonoBehaviour
         }
 
         _animator.SetFloat(PARAM_SPEED, input.sqrMagnitude);
+
+        // Reset sprite flip khi không còn fishing VÀ transition đã hoàn tất.
+        if (spriteRenderer != null && !fishingController.IsFishing && !_animator.IsInTransition(0))
+            spriteRenderer.flipX = false;
     }
 
     private void OnToolUsed(object sender, Player.ToolUsedEventArgs e)
     {
         SetFacingTowardIndicator();
         ApplySideFlip(e.ToolType);
+
+        if (e.ToolType == ToolType.FishingRod)
+            fishingController?.OnCastStart();
+
         TriggerToolAnimation(e.ToolType);
 
-        if (e.ToolType != ToolType.None && e.ToolType != ToolType.SeedBag)
+        // FishingRod lifecycle is managed entirely by FishingController.
+        // Skip WaitForActionCompleteRoutine to avoid unlocking prematurely.
+        bool needsFallbackUnlock = e.ToolType != ToolType.None
+                                && e.ToolType != ToolType.SeedBag
+                                && e.ToolType != ToolType.FishingRod;
+
+        if (needsFallbackUnlock)
         {
             if (_unlockRoutine != null) StopCoroutine(_unlockRoutine);
             _unlockRoutine = StartCoroutine(WaitForActionCompleteRoutine());
@@ -162,6 +194,15 @@ public class PlayerAnimator : MonoBehaviour
         _unlockRoutine = null;
         player.UnlockAction();
     }
+
+    /// <summary>Triggers the Fishing_Reel animator parameter (correct timing catch).</summary>
+    public void TriggerFishingReel() => _animator.SetTrigger(PARAM_FISHING_REEL);
+
+    /// <summary>Triggers the Fishing_Exit animator parameter (cancel or miss).</summary>
+    public void TriggerFishingExit() => _animator.SetTrigger(PARAM_FISHING_EXIT);
+
+    /// <summary>Sets IsFishingOnWater bool — controls Fishing_Cast transition destination.</summary>
+    public void SetIsFishingOnWater(bool value) => _animator.SetBool(PARAM_IS_FISHING_ON_WATER, value);
 
     private void TriggerToolAnimation(ToolType toolType)
     {

@@ -32,6 +32,7 @@ public class Player : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private ToolSO equippedTool;
+    [SerializeField] private FishingController fishingController;
 
 
     // ----------------------------------------------------------
@@ -160,8 +161,8 @@ public class Player : MonoBehaviour
     private void OnUseToolInputReceived(object sender, EventArgs e)
     {
         if (_isPointerOverUI) return;
-
         if (IsMoving) return;
+        if (fishingController != null && fishingController.IsFishing) return;
 
         OnToolUsed?.Invoke(this, new ToolUsedEventArgs { ToolType = EquippedToolType });
 

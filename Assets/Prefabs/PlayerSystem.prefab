@@ -367,6 +367,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimator
   player: {fileID: 656147129802342375}
   wateringEffect: {fileID: 5151961515505622235}
+  fishingController: {fileID: 4636060589192013335}
   spriteRenderer: {fileID: 6751303949695474086}
 --- !u!1 &4821889753901417574
 GameObject:
@@ -380,6 +381,7 @@ GameObject:
   - component: {fileID: 656147129802342375}
   - component: {fileID: 6395866951944024735}
   - component: {fileID: 8417462771174138160}
+  - component: {fileID: 4636060589192013335}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -420,6 +422,7 @@ MonoBehaviour:
   playerIndicator: {fileID: 8818145148435535920}
   moveSpeed: 4
   equippedTool: {fileID: 11400000, guid: 7fd53173c23c3e94798f19cfbc9e23d1, type: 2}
+  fishingController: {fileID: 0}
   _debugCurrentTarget: None
 --- !u!50 &6395866951944024735
 Rigidbody2D:
@@ -485,6 +488,25 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0.05}
   m_Size: {x: 0.5, y: 0.2}
   m_Direction: 1
+--- !u!114 &4636060589192013335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4821889753901417574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8582871b2e21bf4f9290fad8d7e3176, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FishingController
+  playerAnimator: {fileID: 4631165460590416564}
+  gameInput: {fileID: 2153365797870817182}
+  playerIndicator: {fileID: 8818145148435535920}
+  waterTilemap: {fileID: 0}
+  testFish: {fileID: 11400000, guid: a6602bc33f8ef2a49ae5641573a0f4f5, type: 2}
+  biteDelay: 3
+  nibbleWindowDuration: 1.5
 --- !u!1 &4873472388753681350
 GameObject:
   m_ObjectHideFlags: 0
